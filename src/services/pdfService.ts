@@ -110,7 +110,7 @@ export const INITIAL_BOOKS: BookInfo[] = [
     fileName: 'The Book.pdf',
     title: 'The Book',
     author: 'Alan Watts & Classic Texts',
-    url: '/The Book.pdf',
+    url: 'https://archive.org/download/the-book-alan-watts/The%20Book%20Alan%20Watts.pdf',
     fileSizeBytes: 70176618,
     description: 'On the Taboo Against Knowing Who You Are.',
     colorGradient: 'linear-gradient(135deg, #14532d 0%, #166534 100%)',
@@ -120,22 +120,26 @@ export const INITIAL_BOOKS: BookInfo[] = [
 const pdfDocCache = new Map<string, pdfjsLib.PDFDocumentProxy>();
 
 export const loadPdfDocument = async (url: string): Promise<pdfjsLib.PDFDocumentProxy> => {
-  const safeUrl = encodeURI(url);
+  const isExternal = url.startsWith('http://') || url.startsWith('https://');
+  const safeUrl = isExternal ? url : encodeURI(url);
+
   if (pdfDocCache.has(safeUrl)) {
     return pdfDocCache.get(safeUrl)!;
   }
+
   const loadingTask = pdfjsLib.getDocument({
     url: safeUrl,
     cMapUrl: 'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/cmaps/',
     cMapPacked: true,
     enableXfa: true,
+    withCredentials: false,
   });
+
   const pdfDoc = await loadingTask.promise;
   pdfDocCache.set(safeUrl, pdfDoc);
   return pdfDoc;
 };
 
-// Render page canvas with dynamic width-fitting for mobile phone readability
 export const renderPdfPageToCanvas = async (
   pdfDoc: pdfjsLib.PDFDocumentProxy,
   pageNumber: number,
@@ -154,7 +158,6 @@ export const renderPdfPageToCanvas = async (
 
     let baseScale = 1.0;
     if (isMobile) {
-      // On mobile phones, fit to screen width with comfortable margin so text is large & readable
       baseScale = (parentWidth / unscaledViewport.width) * 0.98;
     } else {
       const scaleX = (parentWidth / unscaledViewport.width) * 0.95;

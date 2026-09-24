@@ -1,9 +1,6 @@
-name = "book-facez"
-compatibility_date = "2024-09-01"
+name = "mybook"
 pages_build_output_dir = "dist"
-
-[assets]
-directory = "./dist"
+compatibility_date = "2024-09-01"
 
 [vars]
 NODE_VERSION = "20"
