@@ -26,17 +26,42 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
 }) => {
   const [filter, setFilter] = useState<FilterType>('all');
   const [covers, setCovers] = useState<Record<string, string>>({});
+  const [availableBooks, setAvailableBooks] = useState<Set<string>>(new Set());
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // Check which built-in PDFs are actually available (they won't be on Vercel)
   useEffect(() => {
     books.forEach((book) => {
-      if (!covers[book.id]) {
-        generateCoverThumbnail(book.url).then((coverDataUrl) => {
-          if (coverDataUrl) {
-            setCovers((prev) => ({ ...prev, [book.id]: coverDataUrl }));
-          }
-        });
+      // Custom/imported books are always available
+      if (book.id.startsWith('custom_') || book.url.startsWith('blob:')) {
+        setAvailableBooks((prev) => new Set(prev).add(book.id));
+        if (!covers[book.id]) {
+          generateCoverThumbnail(book.url).then((coverDataUrl) => {
+            if (coverDataUrl) {
+              setCovers((prev) => ({ ...prev, [book.id]: coverDataUrl }));
+            }
+          });
+        }
+        return;
       }
+
+      // For built-in books, check if the PDF exists by making a HEAD request
+      fetch(book.url, { method: 'HEAD' })
+        .then((res) => {
+          if (res.ok) {
+            setAvailableBooks((prev) => new Set(prev).add(book.id));
+            if (!covers[book.id]) {
+              generateCoverThumbnail(book.url).then((coverDataUrl) => {
+                if (coverDataUrl) {
+                  setCovers((prev) => ({ ...prev, [book.id]: coverDataUrl }));
+                }
+              });
+            }
+          }
+        })
+        .catch(() => {
+          // PDF not available, that's fine
+        });
     });
   }, [books]);
 
@@ -46,7 +71,12 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
     }
   };
 
-  const filteredBooks = books.filter((book) => {
+  // Only show books that are actually available, plus custom imports
+  const displayBooks = books.filter((book) => {
+    return availableBooks.has(book.id) || book.id.startsWith('custom_') || book.url.startsWith('blob:');
+  });
+
+  const filteredBooks = displayBooks.filter((book) => {
     const state = readingStates[book.id];
     const matchesSearch =
       book.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -64,12 +94,12 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
     return true;
   });
 
-  const inProgressCount = books.filter((b) => {
+  const inProgressCount = displayBooks.filter((b) => {
     const s = readingStates[b.id];
     return s && s.completionRate > 0 && s.completionRate < 100;
   }).length;
 
-  const completedCount = books.filter((b) => {
+  const completedCount = displayBooks.filter((b) => {
     const s = readingStates[b.id];
     return s && s.completionRate >= 99;
   }).length;
@@ -91,7 +121,7 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
           <div>
             <h1 className="library-title">Library</h1>
             <p className="library-subtitle">
-              {books.length} Books · {inProgressCount > 0 ? `${inProgressCount} Reading` : 'Ready to read'}
+              {displayBooks.length} Books · {inProgressCount > 0 ? `${inProgressCount} Reading` : 'Ready to read'}
             </p>
           </div>
 
@@ -125,7 +155,7 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
             className={`pill-btn ${filter === 'all' ? 'active' : ''}`}
             onClick={() => setFilter('all')}
           >
-            All Books ({books.length})
+            All Books ({displayBooks.length})
           </button>
           <button
             className={`pill-btn ${filter === 'reading' ? 'active' : ''}`}
@@ -143,7 +173,7 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
       </div>
 
       {/* Currently Reading Hero Card */}
-      {lastActiveBookData && (
+      {lastActiveBookData && availableBooks.has(lastActiveBookData.book.id) && (
         <div
           className="continue-reading-card"
           onClick={() => onSelectBook(lastActiveBookData.book.id)}
@@ -185,6 +215,33 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
 
           <button className="continue-play-btn" title="Open reader">
             <Play size={18} fill="currentColor" />
+          </button>
+        </div>
+      )}
+
+      {/* Empty State - when no books available */}
+      {filteredBooks.length === 0 && (
+        <div style={{
+          textAlign: 'center',
+          padding: '3rem 1.5rem',
+          background: 'var(--bg-card)',
+          borderRadius: 'var(--radius-lg)',
+          border: '1px solid var(--border-subtle)',
+        }}>
+          <BookOpen size={48} style={{ color: 'var(--text-muted)', opacity: 0.4, marginBottom: '1rem' }} />
+          <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '1.2rem', fontWeight: 700, marginBottom: '0.5rem' }}>
+            No Books Yet
+          </h3>
+          <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginBottom: '1.25rem', maxWidth: '340px', margin: '0 auto 1.25rem auto' }}>
+            Import a PDF book from your device to start reading.
+          </p>
+          <button
+            className="btn btn-primary"
+            onClick={() => fileInputRef.current?.click()}
+            style={{ fontSize: '0.9rem', padding: '0.6rem 1.25rem' }}
+          >
+            <Upload size={16} />
+            <span>Import Your First Book</span>
           </button>
         </div>
       )}
