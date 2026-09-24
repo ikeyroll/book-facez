@@ -26,42 +26,20 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
 }) => {
   const [filter, setFilter] = useState<FilterType>('all');
   const [covers, setCovers] = useState<Record<string, string>>({});
-  const [availableBooks, setAvailableBooks] = useState<Set<string>>(new Set());
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Check which built-in PDFs are actually available (they won't be on Vercel)
+  // Generate cover thumbnails
   useEffect(() => {
     books.forEach((book) => {
-      // Custom/imported books are always available
-      if (book.id.startsWith('custom_') || book.url.startsWith('blob:')) {
-        setAvailableBooks((prev) => new Set(prev).add(book.id));
-        if (!covers[book.id]) {
-          generateCoverThumbnail(book.url).then((coverDataUrl) => {
-            if (coverDataUrl) {
-              setCovers((prev) => ({ ...prev, [book.id]: coverDataUrl }));
-            }
-          });
-        }
-        return;
-      }
-
-      // For built-in books, check if the PDF exists by making a HEAD request
-      fetch(book.url, { method: 'HEAD' })
-        .then((res) => {
-          if (res.ok) {
-            setAvailableBooks((prev) => new Set(prev).add(book.id));
-            if (!covers[book.id]) {
-              generateCoverThumbnail(book.url).then((coverDataUrl) => {
-                if (coverDataUrl) {
-                  setCovers((prev) => ({ ...prev, [book.id]: coverDataUrl }));
-                }
-              });
-            }
+      if (!covers[book.id]) {
+        generateCoverThumbnail(book.url).then((coverDataUrl) => {
+          if (coverDataUrl) {
+            setCovers((prev) => ({ ...prev, [book.id]: coverDataUrl }));
           }
-        })
-        .catch(() => {
-          // PDF not available, that's fine
+        }).catch((err) => {
+          console.warn('Cover generation failed for', book.title, err);
         });
+      }
     });
   }, [books]);
 
@@ -71,12 +49,7 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
     }
   };
 
-  // Only show books that are actually available, plus custom imports
-  const displayBooks = books.filter((book) => {
-    return availableBooks.has(book.id) || book.id.startsWith('custom_') || book.url.startsWith('blob:');
-  });
-
-  const filteredBooks = displayBooks.filter((book) => {
+  const filteredBooks = books.filter((book) => {
     const state = readingStates[book.id];
     const matchesSearch =
       book.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -94,12 +67,12 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
     return true;
   });
 
-  const inProgressCount = displayBooks.filter((b) => {
+  const inProgressCount = books.filter((b) => {
     const s = readingStates[b.id];
     return s && s.completionRate > 0 && s.completionRate < 100;
   }).length;
 
-  const completedCount = displayBooks.filter((b) => {
+  const completedCount = books.filter((b) => {
     const s = readingStates[b.id];
     return s && s.completionRate >= 99;
   }).length;

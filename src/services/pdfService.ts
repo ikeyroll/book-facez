@@ -1,8 +1,9 @@
 import * as pdfjsLib from 'pdfjs-dist';
+import pdfWorker from 'pdfjs-dist/build/pdf.worker.min.js?url';
 import { BookInfo, TocItem } from '../types/book';
 
-// Set up PDF.js worker to standard CDN matching pdfjs-dist version
-pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
+// Set up PDF.js worker bundled directly with Vite
+pdfjsLib.GlobalWorkerOptions.workerSrc = pdfWorker;
 
 export const INITIAL_BOOKS: BookInfo[] = [
   {

@@ -11,8 +11,7 @@ lerna-debug.log*
 node_modules
 dist
 
-# PDF books (too large for Vercel deployment)
-*.pdf
+# Other
 desktop.ini
 dist-ssr
 *.local
