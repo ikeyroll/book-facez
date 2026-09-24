@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { BookInfo, BookReadingState } from '../types/book';
 import { generateCoverThumbnail } from '../services/pdfService';
-import { BookOpen, Bookmark, Play, CheckCircle2, Search, SlidersHorizontal } from 'lucide-react';
+import { BookOpen, Play, Search, Upload, Plus } from 'lucide-react';
 
 interface LibraryViewProps {
   books: BookInfo[];
@@ -10,6 +10,7 @@ interface LibraryViewProps {
   searchQuery: string;
   onSearchChange: (query: string) => void;
   lastActiveBookData?: { book: BookInfo; state: BookReadingState } | null;
+  onImportCustomPdf?: (file: File) => void;
 }
 
 type FilterType = 'all' | 'reading' | 'completed';
@@ -21,9 +22,11 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
   searchQuery,
   onSearchChange,
   lastActiveBookData,
+  onImportCustomPdf,
 }) => {
   const [filter, setFilter] = useState<FilterType>('all');
   const [covers, setCovers] = useState<Record<string, string>>({});
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     books.forEach((book) => {
@@ -36,6 +39,12 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
       }
     });
   }, [books]);
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0] && onImportCustomPdf) {
+      onImportCustomPdf(e.target.files[0]);
+    }
+  };
 
   const filteredBooks = books.filter((book) => {
     const state = readingStates[book.id];
@@ -67,9 +76,18 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
 
   return (
     <div className="library-container">
-      {/* Search & Top Mobile Header */}
+      {/* Hidden File Input for Importing Custom PDFs */}
+      <input
+        type="file"
+        ref={fileInputRef}
+        accept=".pdf"
+        style={{ display: 'none' }}
+        onChange={handleFileChange}
+      />
+
+      {/* Search & Top Header */}
       <div className="library-top-bar">
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', marginBottom: '1rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', marginBottom: '1rem', flexWrap: 'wrap', gap: '0.5rem' }}>
           <div>
             <h1 className="library-title">Library</h1>
             <p className="library-subtitle">
@@ -77,15 +95,27 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
             </p>
           </div>
 
-          <div className="search-pill">
-            <Search size={16} className="search-pill-icon" />
-            <input
-              type="text"
-              placeholder="Search library..."
-              value={searchQuery}
-              onChange={(e) => onSearchChange(e.target.value)}
-              className="search-pill-input"
-            />
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <button
+              className="btn btn-primary"
+              onClick={() => fileInputRef.current?.click()}
+              style={{ fontSize: '0.8rem', padding: '0.45rem 0.85rem' }}
+              title="Import a PDF book from your device"
+            >
+              <Upload size={14} />
+              <span>Import PDF</span>
+            </button>
+
+            <div className="search-pill">
+              <Search size={16} className="search-pill-icon" />
+              <input
+                type="text"
+                placeholder="Search..."
+                value={searchQuery}
+                onChange={(e) => onSearchChange(e.target.value)}
+                className="search-pill-input"
+              />
+            </div>
           </div>
         </div>
 
@@ -112,7 +142,7 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
         </div>
       </div>
 
-      {/* Currently Reading Hero Card (Clean & Sophisticated) */}
+      {/* Currently Reading Hero Card */}
       {lastActiveBookData && (
         <div
           className="continue-reading-card"
