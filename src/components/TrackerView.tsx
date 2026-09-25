@@ -38,6 +38,9 @@ export const TrackerView: React.FC<TrackerViewProps> = ({
   const [editCategory, setEditCategory] = useState<ChecklistCategory>('Manhwa');
   const [editLastChapter, setEditLastChapter] = useState('');
 
+  // Delete Confirmation State
+  const [deletingItem, setDeletingItem] = useState<ChecklistItem | null>(null);
+
   // Helper to parse chapter number
   const parseChapterNum = (chStr?: string): number => {
     if (!chStr) return 0;
@@ -157,32 +160,34 @@ export const TrackerView: React.FC<TrackerViewProps> = ({
           />
         </div>
 
-        <div className="add-input-wrapper cat-field">
-          <select
-            value={newCategory}
-            onChange={(e) => setNewCategory(e.target.value as ChecklistCategory)}
-          >
-            {CATEGORIES.map((cat) => (
-              <option key={cat} value={cat}>
-                {cat}
-              </option>
-            ))}
-          </select>
-        </div>
+        <div className="mobile-add-row">
+          <div className="add-input-wrapper cat-field">
+            <select
+              value={newCategory}
+              onChange={(e) => setNewCategory(e.target.value as ChecklistCategory)}
+            >
+              {CATEGORIES.map((cat) => (
+                <option key={cat} value={cat}>
+                  {cat}
+                </option>
+              ))}
+            </select>
+          </div>
 
-        <div className="add-input-wrapper ch-field">
-          <input
-            type="text"
-            placeholder="Ch. #"
-            value={newLastChapter}
-            onChange={(e) => setNewLastChapter(e.target.value)}
-          />
-        </div>
+          <div className="add-input-wrapper ch-field">
+            <input
+              type="text"
+              placeholder="Ch. #"
+              value={newLastChapter}
+              onChange={(e) => setNewLastChapter(e.target.value)}
+            />
+          </div>
 
-        <button type="submit" className="btn btn-primary add-submit-btn">
-          <Plus size={16} />
-          <span>Add</span>
-        </button>
+          <button type="submit" className="btn btn-primary add-submit-btn">
+            <Plus size={16} />
+            <span>Add</span>
+          </button>
+        </div>
       </form>
 
       {/* Simple Clean Table */}
@@ -192,8 +197,13 @@ export const TrackerView: React.FC<TrackerViewProps> = ({
             <tr>
               <th className="col-title">Title</th>
               <th className="col-type">Type</th>
-              <th className="col-chapter">Last Chapter Read</th>
-              <th className="col-actions">Actions</th>
+              <th className="col-chapter">
+                <span className="desktop-header-text">Last Chapter Read</span>
+                <span className="mobile-header-text">Chapter</span>
+              </th>
+              <th className="col-actions">
+                <span className="desktop-header-text">Actions</span>
+              </th>
             </tr>
           </thead>
           <tbody>
@@ -306,7 +316,7 @@ export const TrackerView: React.FC<TrackerViewProps> = ({
                         </button>
                         <button
                           className="row-action-btn delete"
-                          onClick={() => handleDeleteItem(item.id)}
+                          onClick={() => setDeletingItem(item)}
                           title="Delete"
                         >
                           <Trash2 size={14} />
@@ -327,6 +337,44 @@ export const TrackerView: React.FC<TrackerViewProps> = ({
           </tbody>
         </table>
       </div>
+
+      {/* Delete Confirmation Modal */}
+      {deletingItem && (
+        <div className="confirm-modal-overlay" onClick={() => setDeletingItem(null)}>
+          <div className="confirm-modal-card" onClick={(e) => e.stopPropagation()}>
+            <div className="confirm-modal-header">
+              <div className="warning-icon-wrapper">
+                <Trash2 size={20} color="#ef4444" />
+              </div>
+              <div>
+                <h3 className="confirm-title">Delete Title</h3>
+                <p className="confirm-subtitle">
+                  Are you sure you want to delete <strong style={{ color: '#ffffff' }}>"{deletingItem.title}"</strong> from your reading list?
+                </p>
+              </div>
+            </div>
+
+            <div className="confirm-actions">
+              <button
+                className="btn btn-secondary"
+                onClick={() => setDeletingItem(null)}
+              >
+                Cancel
+              </button>
+              <button
+                className="btn delete-confirm-btn"
+                onClick={() => {
+                  handleDeleteItem(deletingItem.id);
+                  setDeletingItem(null);
+                }}
+              >
+                <Trash2 size={15} />
+                <span>Delete</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
