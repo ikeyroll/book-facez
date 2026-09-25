@@ -28,19 +28,31 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
   const [covers, setCovers] = useState<Record<string, string>>({});
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Generate cover thumbnails
+  // Generate cover thumbnails sequentially to avoid overloading memory
   useEffect(() => {
-    books.forEach((book) => {
-      if (!covers[book.id]) {
-        generateCoverThumbnail(book.url).then((coverDataUrl) => {
-          if (coverDataUrl) {
+    let isMounted = true;
+
+    const loadCoversSequentially = async () => {
+      for (const book of books) {
+        if (!isMounted) break;
+        if (covers[book.id]) continue;
+
+        try {
+          const coverDataUrl = await generateCoverThumbnail(book.url);
+          if (isMounted && coverDataUrl) {
             setCovers((prev) => ({ ...prev, [book.id]: coverDataUrl }));
           }
-        }).catch((err) => {
-          console.warn('Cover generation failed for', book.title, err);
-        });
+        } catch (err) {
+          console.warn('Cover generation skipped for', book.title, err);
+        }
       }
-    });
+    };
+
+    loadCoversSequentially();
+
+    return () => {
+      isMounted = false;
+    };
   }, [books]);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -94,7 +106,7 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
           <div>
             <h1 className="library-title">Library</h1>
             <p className="library-subtitle">
-              {displayBooks.length} Books · {inProgressCount > 0 ? `${inProgressCount} Reading` : 'Ready to read'}
+              {filteredBooks.length} Books · {inProgressCount > 0 ? `${inProgressCount} Reading` : 'Ready to read'}
             </p>
           </div>
 
@@ -128,7 +140,7 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
             className={`pill-btn ${filter === 'all' ? 'active' : ''}`}
             onClick={() => setFilter('all')}
           >
-            All Books ({displayBooks.length})
+            All Books ({books.length})
           </button>
           <button
             className={`pill-btn ${filter === 'reading' ? 'active' : ''}`}
@@ -146,7 +158,7 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
       </div>
 
       {/* Currently Reading Hero Card */}
-      {lastActiveBookData && availableBooks.has(lastActiveBookData.book.id) && (
+      {lastActiveBookData && books.some((b) => b.id === lastActiveBookData.book.id) && (
         <div
           className="continue-reading-card"
           onClick={() => onSelectBook(lastActiveBookData.book.id)}
