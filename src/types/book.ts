@@ -6,15 +6,20 @@ export interface Bookmark {
   note?: string;
 }
 
-export type ChecklistCategory = 'Manhwa' | 'Manhua' | 'Manga' | 'Others';
+export type ChecklistCategory = 'Manhwa' | 'Manhua' | 'Manga' | 'Novels' | 'Books' | 'Others';
+export type ChecklistStatus = 'Reading' | 'Plan to Read' | 'Completed' | 'On Hold';
 
 export interface ChecklistItem {
   id: string;
   title: string;
   category: ChecklistCategory;
+  lastChapter?: string;
+  totalChapters?: string;
+  status?: ChecklistStatus;
   completed: boolean;
   createdAt: number;
   note?: string;
+  coverGradient?: string;
 }
 
 export interface BookReadingState {

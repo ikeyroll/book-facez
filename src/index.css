@@ -771,3 +771,390 @@ html, body {
     width: 100%;
   }
 }
+
+/* ==========================================================================
+   Simple Minimalist Table View for Manhwa & Reading List
+   ========================================================================== */
+
+.simple-tracker-container {
+  max-width: 920px;
+  margin: 0 auto;
+  padding: 1.25rem 1rem 3.5rem 1rem;
+  width: 100%;
+}
+
+.simple-tracker-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+}
+
+.back-btn {
+  padding: 0.4rem 0.75rem;
+  font-size: 0.82rem;
+}
+
+.title-area {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.simple-title {
+  font-family: var(--font-display);
+  font-size: 1.35rem;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  color: var(--text-primary);
+}
+
+.count-badge {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  background: rgba(255, 255, 255, 0.06);
+  padding: 2px 8px;
+  border-radius: var(--radius-full);
+  border: 1px solid var(--border-subtle);
+}
+
+.search-box {
+  position: relative;
+  width: 220px;
+}
+
+.search-box input {
+  width: 100%;
+  padding: 0.42rem 0.75rem 0.42rem 2.1rem;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  color: var(--text-primary);
+  font-size: 0.82rem;
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+.search-box input:focus {
+  border-color: var(--accent-primary);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.search-icon {
+  position: absolute;
+  left: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-muted);
+  pointer-events: none;
+}
+
+/* Quick Add Bar */
+.simple-add-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.65rem 0.85rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  margin-bottom: 1.25rem;
+}
+
+.add-input-wrapper {
+  display: flex;
+  flex-direction: column;
+}
+
+.add-input-wrapper.title-field {
+  flex: 1;
+}
+
+.add-input-wrapper.cat-field {
+  width: 130px;
+}
+
+.add-input-wrapper.ch-field {
+  width: 100px;
+}
+
+.simple-add-bar input,
+.simple-add-bar select {
+  width: 100%;
+  padding: 0.45rem 0.65rem;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  font-size: 0.82rem;
+  outline: none;
+}
+
+.simple-add-bar input:focus,
+.simple-add-bar select:focus {
+  border-color: var(--accent-primary);
+}
+
+.simple-add-bar select option {
+  background: #11131c;
+  color: #fff;
+}
+
+.add-submit-btn {
+  padding: 0.45rem 0.9rem;
+  font-size: 0.82rem;
+  flex-shrink: 0;
+}
+
+/* Table Design */
+.table-responsive-wrapper {
+  width: 100%;
+  overflow-x: auto;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-subtle);
+  background: var(--bg-card);
+}
+
+.simple-tracker-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.simple-tracker-table th {
+  padding: 0.75rem 1rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+  border-bottom: 1px solid var(--border-subtle);
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.simple-tracker-table td {
+  padding: 0.8rem 1rem;
+  border-bottom: 1px solid var(--border-subtle);
+  font-size: 0.85rem;
+  vertical-align: middle;
+}
+
+.simple-tracker-table tr:last-child td {
+  border-bottom: none;
+}
+
+.simple-tracker-table tr:hover td {
+  background: rgba(255, 255, 255, 0.025);
+}
+
+.col-title {
+  width: 45%;
+}
+
+.col-type {
+  width: 18%;
+}
+
+.col-chapter {
+  width: 25%;
+}
+
+.col-actions {
+  width: 12%;
+  text-align: right;
+}
+
+.item-title-text {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+/* Clean Type Tag */
+.type-tag {
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: var(--radius-sm);
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-subtle);
+}
+
+/* Stepper Group inside Table */
+.stepper-group {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--border-subtle);
+  padding: 3px 5px;
+  border-radius: var(--radius-sm);
+}
+
+.stepper-btn {
+  width: 24px;
+  height: 24px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.08);
+  border: none;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.stepper-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.stepper-btn-plus {
+  background: rgba(99, 102, 241, 0.2);
+  color: #818cf8;
+}
+
+.stepper-btn-plus:hover {
+  background: var(--accent-primary);
+  color: #ffffff;
+}
+
+.chapter-badge {
+  font-family: var(--font-display);
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  padding: 2px 6px;
+  cursor: pointer;
+  user-select: none;
+  border-radius: 4px;
+  transition: background 0.15s ease;
+}
+
+.chapter-badge:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+/* Action Icons */
+.row-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.35rem;
+}
+
+.row-action-btn {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 5px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+}
+
+.row-action-btn:hover {
+  color: var(--text-primary);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.row-action-btn.delete:hover {
+  color: #ef4444;
+  background: rgba(239, 68, 68, 0.15);
+}
+
+/* Editing inline row styles */
+.editing-row td {
+  background: rgba(99, 102, 241, 0.08) !important;
+}
+
+.table-input,
+.table-select {
+  padding: 0.35rem 0.55rem;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--accent-primary);
+  border-radius: var(--radius-sm);
+  color: #fff;
+  font-size: 0.82rem;
+  outline: none;
+  width: 100%;
+}
+
+.ch-input {
+  width: 90px;
+}
+
+.btn-icon-save,
+.btn-icon-cancel {
+  width: 28px;
+  height: 28px;
+  border-radius: 4px;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.btn-icon-save {
+  background: var(--accent-primary);
+  color: #fff;
+}
+
+.btn-icon-cancel {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--text-muted);
+}
+
+.empty-table-cell {
+  text-align: center;
+  padding: 2.5rem 1rem !important;
+  color: var(--text-muted);
+}
+
+/* Mobile Responsiveness for Table */
+@media (max-width: 640px) {
+  .simple-tracker-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .search-box {
+    width: 100%;
+  }
+
+  .simple-add-bar {
+    flex-wrap: wrap;
+  }
+
+  .add-input-wrapper.title-field {
+    width: 100%;
+  }
+
+  .add-input-wrapper.cat-field,
+  .add-input-wrapper.ch-field {
+    flex: 1;
+  }
+
+  .add-submit-btn {
+    width: 100%;
+  }
+
+  .col-title { width: 40%; }
+  .col-type { width: 20%; }
+  .col-chapter { width: 28%; }
+  .col-actions { width: 12%; }
+}
+
+
